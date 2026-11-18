@@ -337,6 +337,23 @@ tcpedit_set_dstip_map(tcpedit_t *tcpedit, char *value)
 }
 
 /**
+ * Rewrite the Source and Destination IPs bidirectionally using a CIDR map
+ */
+int
+tcpedit_set_bidipnat_map(tcpedit_t *tcpedit, char *value)
+{
+    assert(tcpedit);
+
+    tcpedit->rewrite_ip = true;
+
+    if (!parse_cidr_map(&tcpedit->bidipmap, value)) {
+        tcpedit_seterr(tcpedit, "Unable to parse bidirectional ip map: %s", value);
+        return TCPEDIT_ERROR;
+    }
+    return TCPEDIT_OK;
+}
+
+/**
  * Rewrite TCP/UDP ports using the following format:
  * <src>:<dst>,...
  */

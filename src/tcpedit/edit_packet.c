@@ -32,12 +32,14 @@
 
 static uint32_t randomize_ipv4_addr(tcpedit_t *tcpedit, uint32_t ip);
 static uint32_t remap_ipv4(tcpedit_t *tcpedit, tcpr_cidr_t *cidr, uint32_t original);
+static bool bidipnat_ipv4(tcpedit_t *tcpedit, ipv4_hdr_t *ip_hdr, uint32_t *addr, int l3len);
 static bool is_multicast_ipv4(const uint32_t ip);
 static void set_multicast_ipv4(uint32_t *ip);
 static void set_unicast_ipv4(uint32_t *ip);
 
 static void randomize_ipv6_addr(tcpedit_t *tcpedit, struct tcpr_in6_addr *addr);
 static int remap_ipv6(tcpedit_t *tcpedit, tcpr_cidr_t *cidr, struct tcpr_in6_addr *addr);
+static bool bidipnat_ipv6(tcpedit_t *tcpedit, ipv6_hdr_t *ip6_hdr, struct tcpr_in6_addr *addr, int l3len);
 static int ipv6_header_length(ipv6_hdr_t const *ip6_hdr, size_t pkt_len, size_t l2len);
 static bool is_multicast_ipv6(const struct tcpr_in6_addr *addr);
 static void set_multicast_ipv6(struct tcpr_in6_addr *addr);
@@ -786,6 +788,66 @@ remap_ipv6(tcpedit_t *tcpedit, tcpr_cidr_t *cidr, struct tcpr_in6_addr *addr)
 }
 
 /**
+ * apply the --bidipnat CIDR map to a single IPv4 address.
+ *
+ * The same ordered map is evaluated against both the source and the
+ * destination address, so direction/cache data is irrelevant. Rules are
+ * evaluated in user-supplied order and the first match wins, matching the
+ * --srcipmap/--dstipmap semantics. Returns true when the address changed,
+ * in which case the IPv4 header and Layer 4 checksums are fixed up.
+ */
+static bool
+bidipnat_ipv4(tcpedit_t *tcpedit, ipv4_hdr_t *ip_hdr, uint32_t *addr, int l3len)
+{
+    tcpr_cidrmap_t *ipmap;
+
+    for (ipmap = tcpedit->bidipmap; ipmap != NULL; ipmap = ipmap->next) {
+        if (ip_in_cidr(ipmap->from, *addr)) {
+            uint32_t new_ip = remap_ipv4(tcpedit, ipmap->to, *addr);
+
+            if (new_ip != *addr) {
+                uint32_t old_ip = *addr;
+                *addr = new_ip;
+                ipv4_addr_csum_replace(ip_hdr, old_ip, new_ip, l3len);
+                dbgx(2, "Bidirectional NAT remapped addr to: %s", get_addr2name4(new_ip, RESOLVE));
+                return true;
+            }
+            return false;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * apply the --bidipnat CIDR map to a single IPv6 address.
+ * See bidipnat_ipv4() for the matching and ordering semantics.
+ */
+static bool
+bidipnat_ipv6(tcpedit_t *tcpedit, ipv6_hdr_t *ip6_hdr, struct tcpr_in6_addr *addr, int l3len)
+{
+    tcpr_cidrmap_t *ipmap;
+
+    for (ipmap = tcpedit->bidipmap; ipmap != NULL; ipmap = ipmap->next) {
+        if (ip6_in_cidr(ipmap->from, addr)) {
+            struct tcpr_in6_addr old_ip6;
+
+            memcpy(&old_ip6, addr, sizeof(old_ip6));
+            remap_ipv6(tcpedit, ipmap->to, addr);
+
+            if (memcmp(&old_ip6, addr, sizeof(old_ip6)) != 0) {
+                ipv6_addr_csum_replace(ip6_hdr, &old_ip6, addr, l3len);
+                dbgx(2, "Bidirectional NAT remapped addr to: %s", get_addr2name6(addr, RESOLVE));
+                return true;
+            }
+            return false;
+        }
+    }
+
+    return false;
+}
+
+/**
  * rewrite IP address (layer3)
  * uses -N to rewrite (map) one subnet onto another subnet
  * also support --srcipmap and --dstipmap
@@ -800,6 +862,18 @@ rewrite_ipv4l3(tcpedit_t *tcpedit, ipv4_hdr_t *ip_hdr, tcpr_dir_t direction, int
 
     assert(tcpedit);
     assert(ip_hdr);
+
+    /* --bidipnat applies the same map to both addresses, direction-free */
+    if (tcpedit->bidipmap != NULL) {
+        uint32_t src = ip_hdr->ip_src.s_addr;
+        uint32_t dst = ip_hdr->ip_dst.s_addr;
+
+        bidipnat_ipv4(tcpedit, ip_hdr, &src, len);
+        bidipnat_ipv4(tcpedit, ip_hdr, &dst, len);
+        ip_hdr->ip_src.s_addr = src;
+        ip_hdr->ip_dst.s_addr = dst;
+        return 0;
+    }
 
     /* first check the src/dst IP maps */
     ipmap = tcpedit->srcipmap;
@@ -895,6 +969,13 @@ rewrite_ipv6l3(tcpedit_t *tcpedit, ipv6_hdr_t *ip6_hdr, tcpr_dir_t direction, in
     assert(tcpedit);
     assert(ip6_hdr);
 
+    /* --bidipnat applies the same map to both addresses, direction-free */
+    if (tcpedit->bidipmap != NULL) {
+        bidipnat_ipv6(tcpedit, ip6_hdr, &ip6_hdr->ip_src, l3len);
+        bidipnat_ipv6(tcpedit, ip6_hdr, &ip6_hdr->ip_dst, l3len);
+        goto icmpv6_embedded;
+    }
+
     /* first check the src/dst IP maps */
     ipmap = tcpedit->srcipmap;
     while (ipmap != NULL) {
@@ -976,6 +1057,7 @@ rewrite_ipv6l3(tcpedit_t *tcpedit, ipv6_hdr_t *ip6_hdr, tcpr_dir_t direction, in
         } while (loop);
     }
 
+icmpv6_embedded:
     /*
      * RFC4443 ICMPv6 error messages (Destination Unreachable, Packet Too
      * Big, Time Exceeded, Parameter Problem) embed as much of the

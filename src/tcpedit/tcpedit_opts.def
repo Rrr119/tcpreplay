@@ -65,7 +65,8 @@ flag = {
     max         = 2;
     stack-arg;
     flags-cant  = srcipmap;
-    flass-cant  = dstipmap;
+    flags-cant  = dstipmap;
+    flags-cant  = bidipnat;
     descrip     = "Rewrite IPv4/v6 addresses using pseudo-NAT";
     doc         = <<- EOText
 Takes a comma delimited series of colon delimited CIDR
@@ -91,6 +92,7 @@ flag = {
     arg-type    = string;
     max         = 1;
     flags-cant  = pnat;
+    flags-cant  = bidipnat;
     descrip     = "Rewrite source IPv4/v6 addresses using pseudo-NAT";
     doc         = <<- EOText
 Works just like the --pnat option, but only affects the source IP
@@ -104,10 +106,40 @@ flag = {
     arg-type    = string;
     max         = 1;
     flags-cant  = pnat;
+    flags-cant  = bidipnat;
     descrip     = "Rewrite destination IPv4/v6 addresses using pseudo-NAT";
     doc         = <<- EOText
 Works just like the --pnat option, but only affects the destination IP
 addresses in the IPv4/v6 header.
+EOText;
+};
+
+flag = {
+    name        = bidipnat;
+    arg-type    = string;
+    max         = 1;
+    flags-cant  = pnat;
+    flags-cant  = srcipmap;
+    flags-cant  = dstipmap;
+    descrip     = "Rewrite IPv4/v6 addresses bidirectionally using a CIDR map";
+    doc         = <<- EOText
+Takes a comma delimited series of colon delimited CIDR
+netblock pairs.  Each netblock pair is evaluated in order against
+both the source and destination IP addresses of every packet,
+independently of tcpprep direction data.  If an address matches the
+first netblock, it is rewritten using the second netblock as a
+mask against the high order bits.  The same rule therefore applies
+to either side of the conversation, which makes a single option
+sufficient for captures containing both directions of a flow.
+
+IPv4 Example:
+@example
+--bidipnat=192.168.0.0/16:10.77.0.0/16,172.16.0.0/12:10.1.0.0/24
+@end example
+IPv6 Example:
+@example
+--bidipnat=[2001:db8::/32]:[dead::/16],[2001:db8::/32]:[::ffff:0:0/96]
+@end example
 EOText;
 };
 

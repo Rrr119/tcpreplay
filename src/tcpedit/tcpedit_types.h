@@ -135,6 +135,9 @@ typedef struct {
     tcpr_cidrmap_t *srcipmap;
     tcpr_cidrmap_t *dstipmap;
 
+    /* bidirectional src/dst IP mapping, applied to both addresses */
+    tcpr_cidrmap_t *bidipmap;
+
     /* pseudo-randomize IP addresses using a seed */
     uint32_t seed;
 

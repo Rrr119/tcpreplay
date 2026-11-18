@@ -19,3 +19,12 @@ foreach(_test ${TCPR_UNIT_TESTS})
     # automake's standard "this test does not apply here" code
     set_tests_properties(${_test} PROPERTIES SKIP_RETURN_CODE 77)
 endforeach()
+
+# Offline integration test for tcprewrite's bidirectional CIDR rewriting. It
+# builds its own IPv4/IPv6 pcap and checks addresses plus checksums, so it
+# needs neither root nor a NIC and can run under CTest.
+if(PYTHON3_EXECUTABLE AND TARGET tcprewrite)
+    add_test(NAME bidipnat_rewrite
+        COMMAND ${PYTHON3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/test/bidipnat_check.py
+                $<TARGET_FILE:tcprewrite>)
+endif()

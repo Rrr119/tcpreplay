@@ -9,6 +9,7 @@ nic2 = @nic2@
 hexdump = @test_hexdump@
 
 ENABLE_DEBUG = @debug_run_time_flag@
+PYTHON3 = @PYTHON3@
 TCPPREP=../src/tcpprep --no-arg-comment
 TCPREPLAY=../src/tcpreplay
 TCPREWRITE=../src/tcprewrite
@@ -34,6 +35,7 @@ FRAGROUTE_TESTS =
 endif
 
 EXTRA_DIST = wirecheck.sh mtu_matrix.sh mtu_check_jumbo.py gen_jumbo_pcap.py \
+		bidipnat_check.py \
 		replay_order.sh order_compare.py \
 		test.pcap test_jumbo.pcap test_nano.pcap test_fragroute.pcap \
 		test.auto_bridge test.auto_client test.auto_router \
@@ -236,7 +238,7 @@ tcpprep: auto_router auto_bridge auto_client auto_server auto_first cidr regex \
 	include_packets include_source include_dest
 
 tcprewrite: rewrite_portmap rewrite_range_portmap rewrite_endpoint \
-	rewrite_pnat rewrite_trunc rewrite_pad rewrite_seed rewrite_mac \
+	rewrite_pnat rewrite_bidipnat rewrite_trunc rewrite_pad rewrite_seed rewrite_mac \
 	rewrite_layer2 rewrite_config rewrite_skip rewrite_dltuser rewrite_dlthdlc rewrite_dltraw rewrite_nanosec \
 	rewrite_vlan802.1ad rewrite_vlandel rewrite_efcs \
 	rewrite_1ttl rewrite_2ttl rewrite_3ttl rewrite_1ttl-hdrfix rewrite_2ttl-hdrfix rewrite_3ttl-hdrfix \
@@ -579,6 +581,15 @@ rewrite_pnat:
 	    $(PRINTF) "\t\t\t%s\n" "OK"; \
 	else \
 	    $(PRINTF) "\t\t\t%s\n" "FAILED"; od -Ax -tx1 -v test.$@1 >> test.log; false; \
+	fi
+
+rewrite_bidipnat:
+	$(PRINTF) "%s" "[tcprewrite] Bidirectional NAT test: "
+	$(PRINTF) "%s\n" "*** [tcprewrite] Bidirectional NAT test: " >> test.log
+	if $(PYTHON3) $(srcdir)/bidipnat_check.py $(TCPREWRITE) >> test.log 2>&1; then \
+	    $(PRINTF) "\t%s\n" "OK"; \
+	else \
+	    $(PRINTF) "\t%s\n" "FAILED"; false; \
 	fi
 
 rewrite_mac:

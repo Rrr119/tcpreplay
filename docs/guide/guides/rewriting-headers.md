@@ -45,6 +45,28 @@ $ tcprewrite --infile=in.pcap --outfile=out.pcap \
 
 Rewrite only one side with `--srcipmap` or `--dstipmap`.
 
+## Remap both directions without a cache
+
+`--pnat` needs to know which side of a packet is the client, so a single map
+only covers one direction. `--bidipnat` applies the same ordered map to both
+the source and destination address of every packet, so a capture containing
+both directions of a flow can be retargeted with one option and no
+[`tcpprep`](../tools/tcpprep.md) cache:
+
+```console
+$ tcprewrite --infile=in.pcap --outfile=out.pcap \
+    --bidipnat=10.0.0.0/8:192.168.0.0/16,192.168.0.0/16:10.0.0.0/8 \
+    --fixcsum
+```
+
+IPv6 pairs use brackets, and the checksums are updated automatically when an
+address changes:
+
+```console
+$ tcprewrite --infile=in.pcap --outfile=out.pcap \
+    --bidipnat='[2001:db8:aa::/48]:[2001:db8:bb::/48]'
+```
+
 ## Force a two-endpoint conversation
 
 Make every packet look like traffic between exactly two IPs — handy for pointing

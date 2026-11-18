@@ -43,41 +43,42 @@ typedef enum {
     INDEX_OPT_PNAT                      =  3,
     INDEX_OPT_SRCIPMAP                  =  4,
     INDEX_OPT_DSTIPMAP                  =  5,
-    INDEX_OPT_ENDPOINTS                 =  6,
-    INDEX_OPT_TCP_SEQUENCE              =  7,
-    INDEX_OPT_SKIPBROADCAST             =  8,
-    INDEX_OPT_FIXCSUM                   =  9,
-    INDEX_OPT_FIXHDRLEN                 = 10,
-    INDEX_OPT_MTU                       = 11,
-    INDEX_OPT_MTU_TRUNC                 = 12,
-    INDEX_OPT_EFCS                      = 13,
-    INDEX_OPT_TTL                       = 14,
-    INDEX_OPT_TOS                       = 15,
-    INDEX_OPT_TCLASS                    = 16,
-    INDEX_OPT_FLOWLABEL                 = 17,
-    INDEX_OPT_FIXLEN                    = 18,
-    INDEX_OPT_FUZZ_SEED                 = 19,
-    INDEX_OPT_FUZZ_FACTOR               = 20,
-    INDEX_OPT_SKIPL2BROADCAST           = 21,
-    INDEX_OPT_DLT                       = 22,
-    INDEX_OPT_ENET_DMAC                 = 23,
-    INDEX_OPT_ENET_SMAC                 = 24,
-    INDEX_OPT_ENET_SUBSMAC              = 25,
-    INDEX_OPT_ENET_MAC_SEED             = 26,
-    INDEX_OPT_ENET_MAC_SEED_KEEP_BYTES  = 27,
-    INDEX_OPT_ENET_VLAN                 = 28,
-    INDEX_OPT_ENET_VLAN_TAG             = 29,
-    INDEX_OPT_ENET_VLAN_CFI             = 30,
-    INDEX_OPT_ENET_VLAN_PRI             = 31,
-    INDEX_OPT_ENET_VLAN_PROTO           = 32,
-    INDEX_OPT_HDLC_CONTROL              = 33,
-    INDEX_OPT_HDLC_ADDRESS              = 34,
-    INDEX_OPT_USER_DLT                  = 35,
-    INDEX_OPT_USER_DLINK                = 36,
+    INDEX_OPT_BIDIPNAT                  =  6,
+    INDEX_OPT_ENDPOINTS                 =  7,
+    INDEX_OPT_TCP_SEQUENCE              =  8,
+    INDEX_OPT_SKIPBROADCAST             =  9,
+    INDEX_OPT_FIXCSUM                   = 10,
+    INDEX_OPT_FIXHDRLEN                 = 11,
+    INDEX_OPT_MTU                       = 12,
+    INDEX_OPT_MTU_TRUNC                 = 13,
+    INDEX_OPT_EFCS                      = 14,
+    INDEX_OPT_TTL                       = 15,
+    INDEX_OPT_TOS                       = 16,
+    INDEX_OPT_TCLASS                    = 17,
+    INDEX_OPT_FLOWLABEL                 = 18,
+    INDEX_OPT_FIXLEN                    = 19,
+    INDEX_OPT_FUZZ_SEED                 = 20,
+    INDEX_OPT_FUZZ_FACTOR               = 21,
+    INDEX_OPT_SKIPL2BROADCAST           = 22,
+    INDEX_OPT_DLT                       = 23,
+    INDEX_OPT_ENET_DMAC                 = 24,
+    INDEX_OPT_ENET_SMAC                 = 25,
+    INDEX_OPT_ENET_SUBSMAC              = 26,
+    INDEX_OPT_ENET_MAC_SEED             = 27,
+    INDEX_OPT_ENET_MAC_SEED_KEEP_BYTES  = 28,
+    INDEX_OPT_ENET_VLAN                 = 29,
+    INDEX_OPT_ENET_VLAN_TAG             = 30,
+    INDEX_OPT_ENET_VLAN_CFI             = 31,
+    INDEX_OPT_ENET_VLAN_PRI             = 32,
+    INDEX_OPT_ENET_VLAN_PROTO           = 33,
+    INDEX_OPT_HDLC_CONTROL              = 34,
+    INDEX_OPT_HDLC_ADDRESS              = 35,
+    INDEX_OPT_USER_DLT                  = 36,
+    INDEX_OPT_USER_DLINK                = 37,
         LIBRARY_OPTION_COUNT
 } teOptIndex;
 /** count of all options for tcpedit_stub */
-#define OPTION_CT    37
+#define OPTION_CT    38
 
 /**
  *  Interface defines for all options.  Replace "n" with the UPPER_CASED
@@ -137,6 +138,7 @@ typedef enum {
 #define VALUE_OPT_PNAT           'N'
 #define VALUE_OPT_SRCIPMAP       'S'
 #define VALUE_OPT_DSTIPMAP       'D'
+#define VALUE_OPT_BIDIPNAT       0x101A
 #define VALUE_OPT_ENDPOINTS      'e'
 #define VALUE_OPT_TCP_SEQUENCE   0x1001
 

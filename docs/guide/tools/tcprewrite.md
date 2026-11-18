@@ -45,6 +45,7 @@ $ tcprewrite --infile=in.pcap --outfile=out.pcap [edits...] --fixcsum
     | Option | Effect |
     | --- | --- |
     | `-N`, `--pnat=MAP` | Rewrite IPs by CIDR map, e.g. `10.0.0.0/8:192.168.0.0/16`. |
+    | `--bidipnat=MAP` | Rewrite both source and destination IPs with one CIDR map, with no direction data required. |
     | `-S`, `--srcipmap=MAP` | Rewrite only source IPs. |
     | `-D`, `--dstipmap=MAP` | Rewrite only destination IPs. |
     | `-e`, `--endpoints=IP1:IP2` | Force every packet to look like a conversation between two endpoints. |

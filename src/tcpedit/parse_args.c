@@ -84,6 +84,15 @@ tcpedit_post_args(tcpedit_t *tcpedit)
         }
     }
 
+    /* --bidipnat */
+    if (HAVE_OPT(BIDIPNAT)) {
+        tcpedit->rewrite_ip = true;
+        if (!parse_cidr_map(&tcpedit->bidipmap, OPT_ARG(BIDIPNAT))) {
+            tcpedit_seterr(tcpedit, "Unable to parse --bidipnat=%s", OPT_ARG(BIDIPNAT));
+            return -1;
+        }
+    }
+
     /*
      * If we have one and only one -N, then use the same map data
      * for both interfaces/files

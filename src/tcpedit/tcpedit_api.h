@@ -55,6 +55,7 @@ int tcpedit_set_cidrmap_s2c(tcpedit_t *, char *);
 int tcpedit_set_cidrmap_c2s(tcpedit_t *, char *);
 int tcpedit_set_srcip_map(tcpedit_t *, char *);
 int tcpedit_set_dstip_map(tcpedit_t *, char *);
+int tcpedit_set_bidipnat_map(tcpedit_t *, char *);
 int tcpedit_set_port_map(tcpedit_t *, char *);
 
 #ifdef __cplusplus

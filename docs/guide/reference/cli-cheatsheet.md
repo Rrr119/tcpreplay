@@ -50,6 +50,7 @@ $ sudo tcpreplay -i eth0 -I eth1 -c file.cache file.pcap
 # MAC / IP / port
 $ tcprewrite -i in.pcap -o out.pcap --enet-dmac=00:11:22:33:44:55 --fixcsum
 $ tcprewrite -i in.pcap -o out.pcap --pnat=10.0.0.0/8:192.168.0.0/16 --fixcsum
+$ tcprewrite -i in.pcap -o out.pcap --bidipnat=10.0.0.0/8:192.168.0.0/16 --fixcsum
 $ tcprewrite -i in.pcap -o out.pcap --portmap=80:8080 --fixcsum
 
 # VLAN add / strip

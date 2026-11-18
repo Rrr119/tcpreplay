@@ -606,6 +606,15 @@ tcpedit_close(tcpedit_t **tcpedit_ex)
     safe_free(tcpedit->srcipmap);
     tcpedit->srcipmap = NULL;
 
+    while (tcpedit->bidipmap) {
+        tcpr_cidrmap_t *next = tcpedit->bidipmap->next;
+
+        destroy_cidr(tcpedit->bidipmap->from);
+        destroy_cidr(tcpedit->bidipmap->to);
+        safe_free(tcpedit->bidipmap);
+        tcpedit->bidipmap = next;
+    }
+
     if (tcpedit->portmap) {
         free_portmap(tcpedit->portmap);
         tcpedit->portmap = NULL;

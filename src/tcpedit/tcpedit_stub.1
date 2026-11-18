@@ -69,7 +69,7 @@ you can reuse the same seed value to recreate the traffic.
 Rewrite IPv4/v6 addresses using pseudo-NAT.
 This option may appear up to 2 times.
 This option must not appear in combination with any of the following options:
-srcipmap.
+srcipmap, dstipmap, bidipnat.
 .sp
 Takes a comma delimited series of colon delimited CIDR
 netblock pairs.  Each netblock pair is evaluated in order against
@@ -90,7 +90,7 @@ IPv6 Example:
 Rewrite source IPv4/v6 addresses using pseudo-NAT.
 This option may appear up to 1 times.
 This option must not appear in combination with any of the following options:
-pnat.
+pnat, bidipnat.
 .sp
 Works just like the \--pnat option, but only affects the source IP
 addresses in the IPv4/v6 header.
@@ -99,10 +99,34 @@ addresses in the IPv4/v6 header.
 Rewrite destination IPv4/v6 addresses using pseudo-NAT.
 This option may appear up to 1 times.
 This option must not appear in combination with any of the following options:
-pnat.
+pnat, bidipnat.
 .sp
 Works just like the \--pnat option, but only affects the destination IP
 addresses in the IPv4/v6 header.
+.TP
+.NOP \f\*[B-Font]\-\-bidipnat\f[]=\f\*[I-Font]string\f[]
+Rewrite IPv4/v6 addresses bidirectionally using a CIDR map.
+This option may appear up to 1 times.
+This option must not appear in combination with any of the following options:
+pnat, srcipmap, dstipmap.
+.sp
+Takes a comma delimited series of colon delimited CIDR
+netblock pairs.  Each netblock pair is evaluated in order against
+both the source and destination IP addresses of every packet,
+independently of tcpprep direction data.  If an address matches the
+first netblock, it is rewritten using the second netblock as a
+mask against the high order bits.  The same rule therefore applies
+to either side of the conversation, which makes a single option
+sufficient for captures containing both directions of a flow.
+.sp
+IPv4 Example:
+.nf
+    \--bidipnat=192.168.0.0/16:10.77.0.0/16,172.16.0.0/12:10.1.0.0/24
+.fi
+IPv6 Example:
+.nf
+    \--bidipnat=[2001:db8::/32]:[dead::/16],[2001:db8::/32]:[::ffff:0:0/96]
+.fi
 .TP
 .NOP \f\*[B-Font]\-e\f[] \f\*[I-Font]string\f[], \f\*[B-Font]\-\-endpoints\f[]=\f\*[I-Font]string\f[]
 Rewrite IP addresses to be between two endpoints.
